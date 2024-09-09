@@ -69,6 +69,9 @@
      <verstretch>1</verstretch>
     </sizepolicy>
    </property>
+   <property name="tabPosition">
+    <enum>QTabWidget::TabPosition::North</enum>
+   </property>
    <property name="tabShape">
     <enum>QTabWidget::TabShape::Rounded</enum>
    </property>
@@ -158,29 +161,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-    <widget class="QLabel" name="paste_image_hint">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>0</y>
-       <width>281</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Paste the image here</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="image_text">
-     <property name="geometry">
-      <rect>
-       <x>310</x>
-       <y>40</y>
-       <width>281</width>
-       <height>191</height>
-      </rect>
-     </property>
     </widget>
     <widget class="QWidget" name="gridLayoutWidget_3">
      <property name="geometry">
@@ -445,6 +425,29 @@
       </widget>
      </widget>
     </widget>
+    <widget class="QTextEdit" name="image_text">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>30</y>
+       <width>280</width>
+       <height>200</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="image_button">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>0</y>
+       <width>281</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>paste image</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="group">
     <property name="enabled">
@@ -453,11 +456,76 @@
     <attribute name="title">
      <string>Group</string>
     </attribute>
+    <widget class="QTableWidget" name="group_table">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>581</width>
+       <height>261</height>
+      </rect>
+     </property>
+     <property name="columnCount">
+      <number>0</number>
+     </property>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+    </widget>
+    <widget class="QLineEdit" name="subject_text">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>10</y>
+       <width>249</width>
+       <height>26</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>10</y>
+       <width>58</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Subject</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="sentence">
     <attribute name="title">
      <string>Sentence</string>
     </attribute>
+    <widget class="QLabel" name="sentence_label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>58</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sentence</string>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="sentence_text">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>581</width>
+       <height>71</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

@@ -1,0 +1,12 @@
+{
+    "display_name": "German Flashcard Maker",
+    "module_name": "german_flashcard_maker",
+    "repo_name": "german-flashcard-maker",
+    "ankiweb_id": "",
+    "author": "illuminati",
+    "conflicts": [],
+    "targets": [
+        "anki21"
+    ],
+    "min_anki_version": "2.1.28"
+}

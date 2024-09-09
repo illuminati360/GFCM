@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <div class="frame">
+        <div class="cover">
+            <h1></h1>
+        </div>
+    </div>
+    <script>
+        if ('{{Part}}' != 'group') {
+            var spelling = '{{Spelling}}'.split(', ')[0];
+            switch ('{{Part}}') {
+                case 'n':
+                    spelling = spelling.replace(/^(der|das|die) /g, '');
+                    break;
+                case 'v':
+                default:
+                    break;
+            }
+            var h1 = document.querySelector('.cover h1');
+            var maxFontSize = 10;
+            var size = Math.min(95 / spelling.length, maxFontSize);
+            h1.innerHTML = spelling;
+            h1.style = `font-size: ${size}vh`;
+        } else {
+            var pronounciation = '{{Pronounciation}}';
+            var h1 = document.querySelector('.cover h1');
+            var maxFontSize = 10;
+            var size = Math.min(95 / pronounciation.length, maxFontSize);
+            h1.innerHTML = pronounciation;
+            h1.style = `font-size: ${size}vh`;
+        }
+    </script>
+</body>
+
+</html>

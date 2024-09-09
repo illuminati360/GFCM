@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <script src='_svg.min.js'></script>
+    <script src='_karte.js'></script>
+</head>
+
+<body>
+    <div class="frame"></div>
+    <script>
+        if ('{{Part}}' != 'group') {
+            simpleCard(
+                {
+                    spelling: '{{Spelling}}',
+                    pronounciation: '{{Pronounciation}}',
+                    meaning: {
+                        part: '{{Part}}',
+                        image: '{{Image}}',
+                        hint: '{{Hint}}',
+                    },
+                    type: '{{Type}}',
+                },
+                document.querySelector('.frame')
+            )
+        } else {
+            groupCard(
+                {
+                    spelling: '{{Spelling}}',
+                    pronounciation: '{{Pronounciation}}',
+                    meaning: {
+                        part: '{{Part}}',
+                        image: '{{Image}}',
+                        hint: '{{Hint}}',
+                    },
+                    type: '{{Type}}',
+                },
+                document.querySelector('.frame')
+            )
+        }
+    </script>
+</body>
+
+</html>

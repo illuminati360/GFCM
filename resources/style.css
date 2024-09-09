@@ -1,0 +1,46 @@
+.card {
+    font-family: arial;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.frame {
+    position: relative;
+    height: 87vh;
+    text-align: center;
+    padding: 1vh;
+    width: calc(87vh/5*3);
+    border: 0.5vh solid;
+    border-radius: 2.5% / 1.5%;
+
+}
+
+.cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 87vh;
+}
+
+.nightMode .shape {
+    stroke: #F2F2F2;
+}
+
+.nightMode line {
+    stroke: #F2F2F2;
+}
+
+.shape path {
+    stroke: #000000;
+}
+
+.nightMode .shape path {
+    stroke: #ffffff;
+}
+
+.nightMode .black {
+    fill: #F2F2F2;
+}

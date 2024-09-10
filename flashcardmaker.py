@@ -14,7 +14,17 @@ from typing import Callable
 import base64
 
 import aqt
-from aqt import QDialog, QClipboard, QMimeData, QImage, QBuffer
+from aqt import (
+    QDialog,
+    QClipboard,
+    QMimeData,
+    QImage,
+    QBuffer,
+    QHeaderView,
+    QPushButton,
+    QLineEdit,
+    QLabel,
+)
 from aqt.qt import Qt
 from aqt.utils import showInfo, showWarning, tr
 from anki.httpclient import HttpClient
@@ -22,6 +32,24 @@ from anki.collection import Config
 from PyQt6 import QtCore, QtGui
 
 from .forms.flashcardmaker import Ui_MeinWindow
+
+import sys
+import pathlib
+import importlib
+module_name = "spacy"
+dep_dir_name = "dep/lib/python3.12/site-packages/"
+ADDON_ROOT_DIR = pathlib.Path(__file__).parent
+sys.path.insert(0, os.path.join(ADDON_ROOT_DIR, dep_dir_name))
+module_path = os.path.join(ADDON_ROOT_DIR, dep_dir_name, module_name)
+source = os.path.join(module_path, "__init__.py")
+spec = importlib.util.spec_from_file_location(
+    module_name, source, submodule_search_locations=[]
+)
+module = importlib.util.module_from_spec(spec)
+sys.modules[module_name] = module
+spec.loader.exec_module(module)
+
+import spacy
 
 pos2pageindex = {
     "Nomen": 0,
@@ -127,9 +155,11 @@ class FlashCardMakerWindow(QDialog):
         self.setupPager()
         self.setupButtons()
         self.setupImageTextEdit()
-        # sentence
+        # group
         self.setupTable()
         self.show()
+        # sentence
+        self.setupParser()
 
     # pager
     def onPosDropdown(self, index):
@@ -168,6 +198,29 @@ class FlashCardMakerWindow(QDialog):
             return self.form.spelling_text.text()
 
     def addNote(self):
+        i = self.form.tabs.currentIndex()
+        t = self.form.tabs.tabText(i)
+        if t == "&Word":
+            self.addWordNote()
+        elif t == "&Group":
+            self.addGroupNote()
+
+    def insertNote(self, *argv):
+        deck = self.mw.col.decks.id_for_name(DECK_NAME)
+        model = self.mw.col.models.by_name(CARD_TYPE_NAME)
+        note = self.mw.col.new_note(model)
+
+        note.fields = argv
+
+        spelling = argv[0]
+        found = self.mw.col.find_notes('deck:"%s" spelling:"%s"' % (DECK_NAME, spelling))
+        if found:
+            showInfo("Card already exists.")
+            return
+        self.mw.col.add_note(note, deck)
+        showInfo("Added successfully!")
+
+    def addWordNote(self):
         spelling = self.getSpelling()
         if not spelling:
             return
@@ -176,29 +229,35 @@ class FlashCardMakerWindow(QDialog):
 
         # save image
         doc = BeautifulSoup(self.form.image_text.toHtml(), "html.parser")
-        file_name = doc("img")[0]["src"]
+        img = doc.find("img")
+        file_name = img["src"] if img else ""
 
         hint = self.form.hint_text.text()
         type = self.form.irregular_checkbox.isChecked()
 
-        deck = self.mw.col.decks.id_for_name(DECK_NAME)
-        model = self.mw.col.models.by_name(CARD_TYPE_NAME)
-        note = self.mw.col.new_note(model)
-        note.fields = [
+        self.insertNote(
             spelling,
             pronounciation,
             part,
             file_name,
             hint,
             "irregular" if type else "",
-        ]
+        )
 
-        found = self.mw.col.find_notes('spelling:"%s"' % (spelling))
-        if found:
-            showInfo("Card already exists.")
-            return
-        self.mw.col.add_note(note, deck)
-        showInfo("Added successfully!")
+    def addGroupNote(self):
+        t = self.form.group_table
+        r = []
+        for i in range(t.rowCount()):
+            r.append(
+                {
+                    "spelling": t.cellWidget(i, 1).text(),
+                    "meaning": t.cellWidget(i, 2).text(),
+                }
+            )
+        spelling = "; ".join(list(map(lambda x: x["spelling"], r)))
+        pronounciation = self.form.subject_text.text()
+        hint = "; ".join(list(map(lambda x: x["meaning"], r)))
+        self.insertNote(spelling, pronounciation, "group", "", hint, "")
 
     def onAddButtonClick(self):
         self.addNote()
@@ -222,9 +281,9 @@ class FlashCardMakerWindow(QDialog):
             return f'<img src="{name}">'
 
     def urlToFile(self, url: str) -> str | None:
-        l = url.lower()
+        lr = url.lower()
         for suffix in pics + audio:
-            if l.endswith(f".{suffix}"):
+            if lr.endswith(f".{suffix}"):
                 return self._retrieveURL(url)
         # not a supported type
         return None
@@ -342,7 +401,7 @@ class FlashCardMakerWindow(QDialog):
         if html.find(">") < 0:
             return html
 
-        with warnings.catch_warnings() as w:
+        with warnings.catch_warnings() as _:
             warnings.simplefilter("ignore", UserWarning)
             doc = BeautifulSoup(html, "html.parser")
 
@@ -472,10 +531,80 @@ class FlashCardMakerWindow(QDialog):
         self.form.image_button.clicked.connect(self.onImagePaste)
 
     # group table
+    def add_active_row(self):
+        row_position = self.form.group_table.rowCount()
+        self.form.group_table.insertRow(row_position)
+
+        btn = QPushButton("+")
+        btn.clicked.connect(lambda: self.add_row(btn))
+        self.form.group_table.setCellWidget(row_position, 0, btn)
+
+        spelling_edit = QLineEdit()
+        meaning_edit = QLineEdit()
+        self.form.group_table.setCellWidget(row_position, 1, spelling_edit)
+        self.form.group_table.setCellWidget(row_position, 2, meaning_edit)
+
+    def add_row(self, btn):
+        row_position = self.form.group_table.indexAt(btn.pos()).row()
+
+        # Change the button to a minus sign
+        btn.setText("-")
+        btn.clicked.disconnect()
+        btn.clicked.connect(lambda: self.remove_row(btn))
+
+        # Change QLineEdit to QLabel
+        spelling_text = self.form.group_table.cellWidget(row_position, 1).text()
+        meaning_text = self.form.group_table.cellWidget(row_position, 2).text()
+        self.form.group_table.setCellWidget(row_position, 1, QLabel(spelling_text))
+        self.form.group_table.setCellWidget(row_position, 2, QLabel(meaning_text))
+
+        # Add a new active row
+        self.add_active_row()
+
+    def remove_row(self, btn):
+        row_position = self.form.group_table.indexAt(btn.pos()).row()
+        self.form.group_table.removeRow(row_position)
+
+        # Ensure there's always one active row
+        if self.form.group_table.rowCount() == 0:
+            self.add_active_row()
+
     def setupTable(self):
         t = self.form.group_table
         t.setColumnCount(3)
         t.setHorizontalHeaderLabels(["", "Spelling", "Meaning"])
+        t.setColumnWidth(0, 30)
+
+        header = t.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+
+        self.add_active_row()
+
+    # sentence
+    def onParseButtonClick(self):
+        text = self.form.sentence_text.toPlainText()
+        doc = self.nlp(text)
+        t = self.form.tags_table
+        for i in reversed(range(t.rowCount())):
+            t.removeRow(i)
+        for (i, token) in enumerate(doc):
+            t.insertRow(i)
+            self.form.tags_table.setCellWidget(i, 0, QLabel(token.text))
+            self.form.tags_table.setCellWidget(i, 1, QLabel(token.pos_))
+            self.form.tags_table.setCellWidget(i, 2, QLabel(token.tag_))
+
+    def setupParser(self):
+        self.nlp = spacy.load("de_core_news_sm")
+
+        t = self.form.tags_table
+        t.setColumnCount(3)
+        t.setHorizontalHeaderLabels(["Text", "POS", "Tag"])
+        header = t.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+        self.form.parse_button.clicked.connect(self.onParseButtonClick)
 
     # clean up
     def closeWithCallback(self, callback: Callable[[], None]) -> None:

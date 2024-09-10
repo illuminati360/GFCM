@@ -8,32 +8,6 @@ from aqt.gui_hooks import (
 from aqt.utils import askUser
 from .flashcardmaker import FlashCardMakerWindow
 
-"""
-from aqt.gui_hooks import editor_did_init_buttons, overview_will_render_content, dialog_manager_did_open_dialog
-def test(editor):
-    showInfo('test')
-
-def setupEditorButtonsFilter(buttons, editor):
-    addon_path = os.path.dirname(__file__)
-    b = editor.addButton(
-        os.path.join(addon_path, "deutschland.svg"),
-        "tablebutton",
-        test,
-        tip="insert",
-        )
-    buttons.append(b)
-    return buttons
-
-def overviewRenderContent(overview, content):
-    content.table += "\n<div>my html</div>"
-
-    return
-
-# editor_did_init_buttons.append(setupEditorButtonsFilter)
-# overview_will_render_content.append(overviewRenderContent)
-"""
-
-
 def setupModel(manager, name, instance):
     if not name == "flashcardmaker":
         return
@@ -75,11 +49,11 @@ def linkHandler():
 
 def toolbarInit(links, toolbar):
     my_link = toolbar.create_link(
-        cmd="gfcm",
+        cmd="gfm",
         func=linkHandler,
         tip="open german flashcard maker",
-        id="gfcm",
-        label="GFCM",
+        id="gfm",
+        label="GFM",
     )
     links.append(my_link)
 
